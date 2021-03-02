@@ -11,6 +11,13 @@
        (boolean (re-matches #"^From .*@.* .*$" line2))))
 
 
+(defn- from-unquote [lines]
+  (map (fn [l]
+         (if (re-find #"^>*From " l)
+           (subs l 1)
+           l))
+       lines))
+
 (defn- parse-lines
   "Given line-seq returns a lazy seq of messages. Messages are
   represented as a lazy sequence of lines."
@@ -20,8 +27,8 @@
          (partition-by (fn [[a b]] (mbox-separator? a b)))
          (filter (fn [[[a b]]] ((complement mbox-separator?) a b)))
          (map #(map first %))
-         (map rest))))
-
+         (map rest)
+         (map from-unquote))))
 
 (defn parse-reader
   "Given the BufferedReader of mbox returns a lazy seq of messages
